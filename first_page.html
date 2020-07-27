@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+    </head>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+
+<style> 
+    circle {fill: lightblue; stroke: black;} 
+
+    body,html{
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        text-align: center;
+  }
+</style>
+    <body onload='init()'>
+        <div id="my_dataviz"></div>
+<script>
+async function init() {
+
+    var w = 500;
+    var h = 300;
+
+    var margin = {
+        top: 60,
+        bottom: 40,
+        left: 70,
+        right: 40
+    };
+    
+    var width = w - margin.left - margin.right;
+    var height = h - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    var data = await d3.csv("https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_daily_reports_us/07-25-2020.csv")
+
+      // Add X axis
+    var x = d3.scaleLinear()
+        .domain([ d3.min(data, function(d){ return d.People_Tested; }),
+            d3.max(data, function(d){ return d.People_Tested; })
+        ])
+        .range([ 0, width ]);
+
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+        .domain([ d3.min(data, function(d){ return d.Confirmed; }),
+                d3.max(data, function(d){ return d.Confirmed; })
+            ])
+        .range([ height, 0]);
+
+    svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // Add dots
+    svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return x(d.People_Tested); } )
+        .attr("cy", function (d) { return y(d.Confirmed); } )
+        .attr("r", function (d) { return y(d.Deaths); })
+        .style("fill", "#69b3a2")
+
+}
+</script>
+    </body>
+</html>
