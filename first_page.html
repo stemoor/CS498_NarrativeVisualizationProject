@@ -19,6 +19,7 @@
     #my_dataviz {
         background-color: lightgrey;
         margin-top: 25px;
+        margin-bottom: 25px;
     }
 
     #page {
@@ -28,7 +29,7 @@
     div.tooltip {	
         position: absolute;			
         text-align: center;			
-        width: 100px;					
+        width: 200px;					
         height: 50px;					
         padding: 2px;				
         font: 12px sans-serif;		
@@ -38,30 +39,55 @@
         pointer-events: none;			
 }
 </style>
-    <body onload='loadGraph()'>
+    <body onload='loadSlide1()'>
 
         <div><h1>Covid-19 Across the USA</h1></div>
         <div id="page">
+            
+            <p id="counter" style="display: none;"> 
+                1 
+            </p> 
+
+            <div><p>Slide</p>
+                <button onclick="loadSlide1()">1</button>
+                <button onclick="loadSlide2()">2</button>
+                <button onclick="loadSlide3()">3</button>
+            </div>
 
             <div id="my_dataviz"></div>
             
             <div id="selector">
                 <label for="date">Choose a DATE:</label>
-                <select name="date" id="date" onchange="loadGraph()">
+                <select name="date" id="date" onchange="load()">
                 <option value="07-25-2020" selected>07-25-2020</option>
-                <option value="06-25-2020">06-25-2020</option>
                 <option value="05-25-2020">05-25-2020</option>
-                <option value="07-25-2020">07-25-2020</option>
-            </div>
-        
-            
+            </div>  
         </div>
 <script>
-async function loadGraph(){
+
+async function load(){
+
+   var counter =  document.getElementById('counter');
+
+   if(counter.innerHTML == "1"){
+        loadSlide1()
+   } else if (counter.innerHTML == "2"){
+       loadSlide2()
+   }else if (counter.innerHTML == "3"){
+       loadSlide3()
+   } else {
+       return
+   }
+}
+
+async function loadSlide1(){
 
     //clean the svg 
 
     d3.select("#my_dataviz").selectAll("*").remove()
+
+    document.getElementById('counter').innerHTML = "1";
+
 
     var w = 600;
     var h = 600;
@@ -84,9 +110,8 @@ async function loadGraph(){
         .attr("height", height + margin.top + margin.bottom)
     .append("g")
         .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-
-    
+            "translate(" + margin.left + "," + margin.top + ")")
+        
     var date = document.getElementById("date").value;
     var data_url = null;
    
@@ -94,12 +119,10 @@ async function loadGraph(){
 
     if(date == "07-25-2020"){
         data_url = "https://raw.githubusercontent.com/stemoor/CS498_NarrativeVisualizationProject/master/data/07-25-2020.csv"
-    } else if (date == "06-25-2020"){
-        data_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/06-25-2020.csv"
     } else if(date == "05-25-2020"){
         data_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/05-25-2020.csv"
-    } else {     
-        return
+    } else {
+        return;
     }
 
     var data = await d3.csv(data_url)
@@ -144,7 +167,7 @@ async function loadGraph(){
             div.transition()		
                 .duration(200)		
                 .style("opacity", .9);		
-            div.html(d.Province_State + "<br/>"  + "Tested=" + d.People_Tested + "<br/> Confirmed=" + d.Confirmed) 	
+            div.html(d.Province_State + "<br/>"  + "People Tested=" + d.People_Tested + "<br/> Confirmed=" + d.Confirmed) 	
                 .style("left", (d3.event.pageX) + "px")		
                 .style("top", (d3.event.pageY - 28) + "px");	
             })					
@@ -158,8 +181,8 @@ async function loadGraph(){
     svg.append("text")
         .attr("text-anchor", "end")
         .attr("x", width)
-        .attr("y", height + margin.top)
-        .text("X axis title");
+        .attr("y", height + margin.top - 20)
+        .text("People Tested");
 
     // Y axis label:
     svg.append("text")
@@ -167,8 +190,225 @@ async function loadGraph(){
         .attr("transform", "rotate(-90)")
         .attr("y", -margin.left+20)
         .attr("x", -margin.top)
-        .text("Y axis title")
+        .text("Confirmed Cases")
 }
+
+async function loadSlide2(){
+
+//clean the svg 
+
+d3.select("#my_dataviz").selectAll("*").remove()
+document.getElementById('counter').innerHTML = "2";
+
+var w = 600;
+var h = 600;
+
+var margin = {
+    top: 60,
+    bottom: 40,
+    left: 70,
+    right: 40
+};
+
+
+var width = w - margin.left - margin.right;
+var height = h - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+.append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+.append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+
+var date = document.getElementById("date").value;
+var data_url = null;
+
+console.log("date " + date)
+
+if(date == "07-25-2020"){
+    data_url = "https://raw.githubusercontent.com/stemoor/CS498_NarrativeVisualizationProject/master/data/07-25-2020.csv"
+} else if(date == "05-25-2020"){
+    data_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/05-25-2020.csv"
+} else {
+    return;
+}
+
+var data = await d3.csv(data_url)
+
+  // Add X axis
+var x = d3.scaleLinear()
+    .domain([0,9000])
+    .range([ 0, width ]);
+
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+// Add Y axis
+var y = d3.scaleLinear()
+    .domain([0, 25000])
+    .range([ height, 0]);
+
+svg.append("g")
+    .call(d3.axisLeft(y));
+
+    // Define the div for the tooltip
+var div = d3.select("#my_dataviz").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
+  // Add dots
+svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("cx", function (d) { return x(d.Deaths); } )
+    .attr("cy", function (d) { return y(d.Recovered); } )
+    .attr("r", 5)
+    .style("fill", "#69b3a2")
+    .on("mouseover", function(d) {		
+        div.transition()		
+            .duration(200)		
+            .style("opacity", .9);		
+        div.html(d.Province_State + "<br/>"  + "Deaths=" + d.Deaths + "<br/> Recovered=" + d.Recovered) 	
+            .style("left", (d3.event.pageX) + "px")		
+            .style("top", (d3.event.pageY - 28) + "px");	
+        })					
+    .on("mouseout", function(d) {		
+        div.transition()		
+            .duration(500)		
+            .style("opacity", 0);	
+    });
+
+// Add X axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + margin.top - 20)
+    .text("Deaths");
+
+// Y axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left+20)
+    .attr("x", -margin.top)
+    .text("Recovered")
+}
+
+async function loadSlide3(){
+
+//clean the svg 
+
+d3.select("#my_dataviz").selectAll("*").remove()
+document.getElementById('counter').innerHTML = "3";
+
+var w = 600;
+var h = 600;
+
+var margin = {
+    top: 60,
+    bottom: 40,
+    left: 70,
+    right: 40
+};
+
+
+var width = w - margin.left - margin.right;
+var height = h - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+.append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+.append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+
+var date = document.getElementById("date").value;
+var data_url = null;
+
+console.log("date " + date)
+
+if(date == "07-25-2020"){
+    data_url = "https://raw.githubusercontent.com/stemoor/CS498_NarrativeVisualizationProject/master/data/07-25-2020.csv"
+} else if(date == "05-25-2020"){
+    data_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/05-25-2020.csv"
+} else {
+    return;
+}
+
+var data = await d3.csv(data_url)
+
+  // Add X axis
+var x = d3.scaleLinear()
+    .domain([0, 45000])
+    .range([ 0, width ]);
+
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+// Add Y axis
+var y = d3.scaleLinear()
+    .domain([0,14000])
+    .range([ height, 0]);
+
+svg.append("g")
+    .call(d3.axisLeft(y));
+
+    // Define the div for the tooltip
+var div = d3.select("#my_dataviz").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
+  // Add dots
+svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("cx", function (d) { return x(d.Active); } )
+    .attr("cy", function (d) { return y(d.People_Hospitalized); } )
+    .attr("r", 5)
+    .style("fill", "#69b3a2")
+    .on("mouseover", function(d) {		
+        div.transition()		
+            .duration(200)		
+            .style("opacity", .9);		
+        div.html(d.Province_State + "<br/>"  + "Active=" + d.Active + "<br/> People Hospitalized=" + d.People_Hospitalized) 	
+            .style("left", (d3.event.pageX) + "px")		
+            .style("top", (d3.event.pageY - 28) + "px");	
+        })					
+    .on("mouseout", function(d) {		
+        div.transition()		
+            .duration(500)		
+            .style("opacity", 0);	
+    });
+
+// Add X axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + margin.top - 20)
+    .text("Active");
+
+// Y axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left+20)
+    .attr("x", -margin.top)
+    .text("People Hospitalized")
+}
+
 </script>
     </body>
 </html>
